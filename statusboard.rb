@@ -23,10 +23,18 @@
 require "rubygems"
 require "date"
 require "json"
+require "yaml"
 
-# Read in the log file.
-# cvs history -a -x AM -D 2013-04-05 > logfile.txt
-logfile = File.open("logfile.txt", "r")
+# Load the configuration file.
+config = YAML.load_file('config.yml')
+
+# Generate the CVS history log.
+# logfile = File.open("logfile.txt", "r")
+if config["server"] == "localhost" || config["server"] == "127.0.0.1" || config["server"].empty?
+   logfile = `cd #{config["repo_path"]} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
+else
+   logfile = `ssh #{config["server"]} "cd #{config["repo_path"]} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
+end
 
 # Prefill the days array. This is incase you have days with no commits.
 days = {}
@@ -46,30 +54,24 @@ output = {
    "graph" => {
       "title" => "Commits Per Day",
       "datasequences" => [
-         "title" => "UniLink",
-         "color" => "blue",
+         "title" => config["title"],
+         "color" => config["color"],
          "datapoints" => Array.new(days.length) { |i|
             {
                # I prefer seeing a day name, but you could do the month and day instead.
-               # "title" => Date.parse(days.keys[i]).strftime("%b %e"),
-               "title" => Date.parse(days.keys[i]).strftime("%a"),
+               # "title" => Date.parse(days.keys[i]).strftime("%b %d"),
+               "title" => Date.parse(days.keys[i]).strftime("%a %d"),
                "value" => days.values[i]
             }
          }.sort_by { |o|
-            # Date.parse() will assume a date this week. Subtracting 7 from days
-            # that haven't happend yet will give us the correct date from last week.
-            if Date.today.day < Date.parse(o["title"]).mday
-               (Date.parse(o["title"]) - 7).mday
-            else
-               Date.parse(o["title"]).mday
-            end
+            o["title"].split(%r/\s+/)[1]
          }
       ]
    }
 }
 
 # Save the file
-File.open(File.expand_path("~/Dropbox/Public/statusboard/commits_per_day.json"), "w+") { |file|
+File.open(File.expand_path("#{config["export_path"]}/commits_per_day.json"), "w+") { |file|
    file.write(
       JSON.pretty_generate(output)
    )

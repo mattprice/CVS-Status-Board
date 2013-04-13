@@ -1,0 +1,5 @@
+server      : user@server
+repo_path   : .
+title       : MyCompany
+color       : blue
+export_path : ~/Dropbox/Public/statusboard
