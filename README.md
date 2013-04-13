@@ -1,6 +1,8 @@
 # About
 CVS Status Board generates a graph of CVS commit statistics for use in Panic's [Status Board](http://panic.com/statusboard/) iPad app.
 
+![](screenshot.png)
+
 The script can be run manually or with the use of a cron job. It supports both local and remote CVS repositories, via SSH. Accessing remote repositories requires key-based authentication. It is not possible to use password-based authentication at this time.
 
 # Configuration
