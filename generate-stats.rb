@@ -33,7 +33,7 @@ config = YAML.load_file('config.yml')
 if config["server"] == "localhost" || config["server"] == "127.0.0.1" || config["server"].empty?
    logfile = `cd #{config["repo_path"]} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
 else
-   logfile = `ssh #{config["server"]} "cd #{config["repo_path"]} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
+   logfile = `ssh -o ConnectTimeout=10 #{config["server"]} "cd #{config["repo_path"]} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
 end
 
 # Prefill the days array. This is incase you have days with no commits.
