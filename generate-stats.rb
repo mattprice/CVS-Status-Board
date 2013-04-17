@@ -30,7 +30,7 @@ config = YAML.load_file('config.yml')
 
 # Generate the CVS history log.
 # logfile = File.open("logfile.txt", "r")
-if config["server"] == "localhost" || config["server"] == "127.0.0.1" || config["server"].empty?
+if config["server"] == "localhost" || config["server"].empty?
    logfile = `cd #{config["repo_path"]} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
 else
    logfile = `ssh -o ConnectTimeout=10 #{config["server"]} "cd #{config["repo_path"]} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
@@ -46,7 +46,12 @@ end
 logfile.each { |entry|
    entry = entry.split(%r/\s+/)
    date = entry[1]
-   days[date] = Integer(days[date]) + 1
+
+   # Our prefilled days hash contains the only dates we want.
+   # Ignore any other dates that `cvs history` returned or this will error.
+   if days.member?(date)
+      days[date] = Integer(days[date]) + 1
+   end
 }
 
 # Create the Status Board JSON.
