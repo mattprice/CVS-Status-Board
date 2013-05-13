@@ -20,20 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require "rubygems"
-require "date"
-require "json"
-require "yaml"
+require 'rubygems'
+require 'date'
+require 'json'
+require 'yaml'
 
 # Load the configuration file.
 config = YAML.load_file('config.yml')
 
 # Generate the CVS history log.
 # logfile = File.open("logfile.txt", "r")
-if config["server"] == "localhost" || config["server"].empty?
-   logfile = `cd #{config["repo_path"]} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
+if config['server'] == 'localhost' || config['server'].empty?
+   logfile = `cd #{config['repo_path']} && cvs history -a -x AM -D #{Date.today-6}`.split("\n")
 else
-   logfile = `ssh -o ConnectTimeout=10 #{config["server"]} "cd #{config["repo_path"]} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
+   logfile = `ssh -o ConnectTimeout=10 #{config['server']} "cd #{config['repo_path']} && cvs history -a -x AM -D #{Date.today-6}"`.split("\n")
 end
 
 # Prefill the days array. This is incase you have days with no commits.
@@ -56,27 +56,27 @@ logfile.each { |entry|
 
 # Create the Status Board JSON.
 output = {
-   "graph" => {
-      "title" => "Commits Per Day",
-      "datasequences" => [
-         "title" => config["title"],
-         "color" => config["color"],
-         "datapoints" => Array.new(days.length) { |i|
+   'graph' => {
+      'title' => '',
+      'datasequences' => [
+         'title' => config['daily']['title'],
+         'color' => config['daily']['color'],
+         'datapoints' => Array.new(days.length) { |i|
             {
                # I prefer seeing a day name, but you could do the month and day instead.
-               # "title" => Date.parse(days.keys[i]).strftime("%b %d"),
-               "title" => Date.parse(days.keys[i]).strftime("%a %d"),
-               "value" => days.values[i]
+               # 'title' => Date.parse(days.keys[i]).strftime('%b %d'),
+               'title' => Date.parse(days.keys[i]).strftime('%a %d'),
+               'value' => days.values[i]
             }
          }.sort_by { |o|
-            o["title"].split(%r/\s+/)[1]
+            o['title'].split(%r/\s+/)[1]
          }
       ]
    }
 }
 
 # Save the file
-File.open(File.expand_path("#{config["export_path"]}/commits_per_day.json"), "w+") { |file|
+File.open(File.expand_path("#{config['export_path']}/#{config['daily']['file']}"), 'w+') { |file|
    file.write(
       JSON.pretty_generate(output)
    )
