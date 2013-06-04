@@ -49,7 +49,7 @@ logfile.each { |entry|
 
    # Our prefilled days hash contains the only dates we want.
    # Ignore any other dates that `cvs history` returned or this will error.
-   if days.member?(date)
+   if days.has_key?(date)
       days[date] = Integer(days[date]) + 1
    end
 }
@@ -66,10 +66,14 @@ output = {
                # I prefer seeing a day name, but you could do the month and day instead.
                # 'title' => Date.parse(days.keys[i]).strftime('%b %d'),
                'title' => Date.parse(days.keys[i]).strftime('%a %d'),
-               'value' => days.values[i]
+               'value' => days.values[i],
+
+               # This is a total hack for getting Ruby to sort the dates correctly.
+               # Status Board doesn't use it.
+               'sort_by' => days.keys[i]
             }
          }.sort_by { |o|
-            o['title'].split(%r/\s+/)[1]
+            o['sort_by']
          }
       ]
    }
